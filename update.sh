@@ -8,3 +8,4 @@ if [ ret ];then
   echo "Success"
 else
   echo "Failed to migrate"
+fi
