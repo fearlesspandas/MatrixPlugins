@@ -27,6 +27,7 @@ object Test{
     val token = login(username,password)
     val room_id = RoomId(sys.env("ROOM_ID"))
     while(true){
+      println(s"using room id$room_id:")
       val res = decode[Response](getMessageEvents(room_id,token))
       val ret = res match {
         case Right(res) if res.chunk.head.event_id != lastprocessedevent &&
