@@ -1,0 +1,76 @@
+#!/bin/bash
+
+SERVER=""
+API_KEY=""
+function getLogin { 
+	creds="{\"type\":\"m.login.password\", \"user\":\"$USER_NAME\", \"password\":\"$PASS\"}"
+	host="https://$SERVER/_matrix/client/r0/login"
+	echo $creds
+}
+function getLoginUrl {
+	echo "https://$SERVER/_matrix/client/r0/login"
+}
+function formatMessage {
+	message=$1
+	echo "{\"msgtype\":\"m.text\", \"body\":\"$message\"}"
+}
+
+function sendMessage {
+	message=$1
+	echo `curl -XPOST -d "{\"msgtype\":\"m.text\", \"body\":\"$message\"}" "https://$SERVER/_matrix/client/r0/rooms/$ROOM_ID/send/m.room.message?access_token=$ACCESS_TOKEN"`
+}
+function getAccessToken {
+	echo `curl -XPOST -d "{\"type\":\"m.login.password\", \"user\":\"$USER_NAME\", \"password\":\"$PASS\"}" "https://$SERVER/_matrix/client/r0/login" | jq .access_token | sed s/\"//g`
+}
+function getStockData {
+	ticker=$1
+	startdate=$2
+	enddate=$3
+	echo `curl "https://api.polygon.io/v2/aggs/ticker/$ticker/range/1/day/$startdate/$enddate?apiKey=$API_KEY"`
+}
+function getEvents {
+	echo `curl -XGET "https://$SERVER/_matrix/client/r0/sync?access_token=$ACCESS_TOKEN" | jq .rooms | jq .join | jq`
+}
+function processArgs {
+  case $1 in
+	  -u)
+		  export USER_NAME=$2
+		  echo "username set"
+		  processArgs ${@:3}
+		  ;;
+	  -p)
+		  export PASS=$2
+		  echo "password set"
+		  processArgs ${@:3}
+		  ;;
+	  -l)
+		  export ACCESS_TOKEN=`getAccessToken`
+		  echo "Retrieved access token
+		  $ACCESS_TOKEN"
+		  processArgs ${@:2}
+		  ;;
+	  -r)	  export ROOM_ID=$2
+		  echo "room set:$ROOM_ID"
+		  processArgs ${@:3}
+		  ;;
+
+	  -m) 	  
+		  sendMessage $2
+		  ;;
+	  -stock-data)
+		  message=$2-high:`getStockData $2 $3 $4 | jq .results | jq .[].h`
+		  echo $message
+		  sendMessage $message
+		  ;;
+	  -e) 
+		  getEvents
+		  ;;
+	  *)
+		  ;;
+    	
+  esac
+}
+while test $# -gt 0; do
+  processArgs ${@:1}
+  break
+done
