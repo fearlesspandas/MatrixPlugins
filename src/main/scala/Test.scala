@@ -25,7 +25,7 @@ object Test{
     val password = sys.env("MATRIX_PASSWORD")
 
     val token = login(username,password)
-    val room_id = decode[RoomId](scala.io.Source.fromFile("room.json").getLines().foldLeft("")(_ + _)).map(r => RoomId(s"${r.value}:${server.name}")).right.get
+    val room_id = RoomId(sys.env("ROOM_ID"))//decode[RoomId](scala.io.Source.fromFile("room.json").getLines().foldLeft("")(_ + _)).map(r => RoomId(s"${r.value}:${server.name}")).right.get
 
     while(true){
       println(s"using room id$room_id:")
