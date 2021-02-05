@@ -65,7 +65,13 @@ object Test{
         .head
         .replaceAll("\"","")
     )
-  def messagedata(msg:String) = s"""{"msgtype":"m.text", "body":"${msg.filter(c => c.isLetterOrDigit || c==' ')}"}"""
+  def isHtml(c:Char) = c match {
+    case '>' => true
+    case '<' => true
+    case '/' => true
+    case _ => false
+  }
+  def messagedata(msg:String) = s"""{"msgtype":"m.text", "body":"${msg.filter(c => c.isLetterOrDigit || c.isSpaceChar || isHtml(c))}"}"""
   def sendmessage(msg:String,access_token:AccessToken,roomid:RoomId)(implicit server: Server):MessageEvent = {
     decode[MessageEvent](
     Http(server.msg_url(roomid,access_token))
