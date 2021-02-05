@@ -1,6 +1,6 @@
 #!/bin/bash
 
-aws s3 cp --r s3://$BUCKET/plugins/ .
+aws s3 cp --r s3://$BUCKET/matrixplugins/ .
 
 ret=$?
 

@@ -25,8 +25,7 @@ object Test{
     val password = sys.env("MATRIX_PASSWORD")
 
     val token = login(username,password)
-    println(s"login successful:$token")
-    val room_id = RoomId("!fYeHcSFDSnjLPPUcGb:chat.chickenhat.io")
+    val room_id = RoomId(sys.env("ROOM_ID"))
     while(true){
       val res = decode[Response](getMessageEvents(room_id,token))
       val ret = res match {
